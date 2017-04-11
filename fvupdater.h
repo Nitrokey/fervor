@@ -3,7 +3,7 @@
 
 #include <QObject>
 #include <QMutex>
-#include <QNetworkAccessManager>
+#include <QtNetwork/QNetworkAccessManager>
 #include <QUrl>
 #include <QXmlStreamReader>
 class FvUpdateWindow;

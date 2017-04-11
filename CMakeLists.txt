@@ -1,12 +1,29 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(Fervor)
+project(Fervor CXX)
 option(FERVOR_BUILD_SAMPLE "Should the sample be built?" OFF)
 option(FERVOR_BUILD_TESTS "Should the tests be built" OFF)
-find_package(Qt4 REQUIRED)
-set(QT_USE_QTNETWORK true)
-set(QT_USE_QTWEBKIT true)
-include(${QT_USE_FILE})
-add_definitions(${QT_DEFINITIONS})
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+IF( USE_QT4 )
+  FIND_PACKAGE( Qt4 REQUIRED )
+  INCLUDE( ${QT_USE_FILE} )
+  SET(QT_USE_QTNETWORK true)
+  SET(QT_USE_QTWEBKIT true)
+  ADD_DEFINITIONS( ${QT_DEFINITIONS} )
+ELSE()
+  FIND_PACKAGE( Qt5Core REQUIRED )
+  FIND_PACKAGE( Qt5Gui REQUIRED )
+  FIND_PACKAGE( Qt5Widgets REQUIRED )
+  FIND_PACKAGE( Qt5Network REQUIRED )
+  FIND_PACKAGE( Qt5WebKitWidgets REQUIRED )
+#    LIST(GET ${Qt5Network_INCLUDE_DIRS} 1 NETW_DIR)
+#    SET(NETW_DIR ${NETW_DIR}/QNetworkAccessManager)
+    message(STATUS ${Qt5Network_INCLUDE_DIRS})
+  INCLUDE_DIRECTORIES( ${Qt5Widgets_INCLUDE_DIRS} ${Qt5Core_INCLUDE_DIRS} ${Qt5Gui_INCLUDE_DIRS} ${Qt5Network_INCLUDE_DIRS} ${Qt5WebKit_INCLUDE_DIRS}  ${Qt5WebKitWidgets_INCLUDE_DIRS} )
+  SET(QT_USE_QTNETWORK true)
+  SET(QT_USE_QTWEBKIT true)
+ENDIF()
+
 if(DEFINED FERVOR_APP_VERSION)
   add_definitions(-DFV_APP_VERSION="${FERVOR_APP_VERSION}")
 else()
@@ -21,37 +38,44 @@ else()
 endif()
 
 set(SOURCES
-  fvavailableupdate.cpp
-  fvignoredversions.cpp
-  fvplatform.cpp
-  fvupdateconfirmdialog.cpp
-  fvupdater.cpp
-  fvupdatewindow.cpp
-  fvversioncomparator.cpp
-)
+        fvavailableupdate.cpp
+        fvignoredversions.cpp
+        fvplatform.cpp
+        fvupdateconfirmdialog.cpp
+        fvupdater.cpp
+        fvupdatewindow.cpp
+        fvversioncomparator.cpp
+        )
 
 set(MOC_HEADERS
-  fvavailableupdate.h
-  fvignoredversions.h
-  fvplatform.h
-  fvupdateconfirmdialog.h
-  fvupdater.h
-  fvupdatewindow.h
-)
+        fvavailableupdate.h
+        fvignoredversions.h
+        fvplatform.h
+        fvupdateconfirmdialog.h
+        fvupdater.h
+        fvupdatewindow.h
+        )
 
 set(UIS
-  fvupdateconfirmdialog.ui
-  fvupdatewindow.ui
-)
+        fvupdateconfirmdialog.ui
+        fvupdatewindow.ui
+        )
 
-qt4_wrap_ui(UI_HEADERS ${UIS})
-qt4_wrap_cpp(MOC_SOURCES ${MOC_HEADERS})
+IF( USE_QT4 )
+  QT4_WRAP_UI(UI_HEADERS ${UIS})
+  QT4_WRAP_CPP(MOC_SOURCES ${MOC_HEADERS})
+ELSE()
+  QT5_WRAP_UI(UI_HEADERS ${UIS})
+  QT5_WRAP_CPP(MOC_SOURCES ${MOC_HEADERS})
+ENDIF()
+
 
 include_directories(
-  ${CMAKE_SOURCE_DIR}
-  ${CMAKE_CURRENT_BINARY_DIR}
+        ${CMAKE_SOURCE_DIR}
+        ${CMAKE_CURRENT_BINARY_DIR}
 )
 add_library(Fervor ${SOURCES} ${MOC_HEADERS} ${MOC_SOURCES} ${UIS})
+target_link_libraries(Fervor Qt5::Network Qt5::WebKit Qt5::WebKitWidgets)
 
 if(FERVOR_BUILD_SAMPLE)
   add_subdirectory(sample)
